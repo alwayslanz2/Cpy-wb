@@ -370,7 +370,9 @@
     </div>
   </div>
 
-  <script>    
+  <script>
+    // Embedded package.json configuration - DIHAPUS karena akan menggunakan package.json eksternal
+    
     // Fungsi untuk memeriksa apakah kode akses masih berlaku
     function isAccessCodeValid(expiryDate) {
       if (!expiryDate) return false;
@@ -380,7 +382,73 @@
       const now = new Date();
       const expiry = new Date(normalizedExpiry);
       
+      // Debug info
+      console.log("Checking expiry:", {
+        input: expiryDate,
+        normalized: normalizedExpiry,
+        expiry: expiry,
+        now: now,
+        isValid: now <= expiry
+      });
+      
       return now <= expiry;
+    }
+    
+    // Fungsi untuk mendapatkan data akses dari package.json
+    async function getAccessData() {
+      try {
+        // Coba ambil dari package.json lokal
+        const response = await fetch('package.json');
+        if (!response.ok) {
+          throw new Error('Package.json tidak ditemukan');
+        }
+        
+        const packageData = await response.json();
+        console.log("Package data loaded:", packageData);
+        
+        if (!packageData.accessList || !Array.isArray(packageData.accessList)) {
+          throw new Error('Struktur accessList tidak valid');
+        }
+        
+        return packageData.accessList;
+      } catch (error) {
+        console.error("Error loading package.json:", error);
+        
+        // Fallback ke data embedded jika package.json tidak tersedia
+        const fallbackData = [
+          {
+            "code": "alwayslanz",
+            "expiry": "2029-12-31T23:59:59"
+          },
+          {
+            "code": "freeakses", 
+            "expiry": "2029-12-31T23:59:59"
+          },
+          {
+            "code": "kontolmmk",
+            "expiry": "2029-12-31T23:59:59"
+          },
+          {
+            "code": "ekatzy",
+            "expiry": "2029-12-31T23:59:59"
+          },
+          {
+            "code": "Varrga",
+            "expiry": "2029-12-31T23:59:59"
+          },
+          {
+            "code": "jovian057",
+            "expiry": "2029-12-31T23:59:59"
+          }, 
+          {
+            "code": "tes",
+            "expiry": "2029-12-31T23:59:59"
+          }
+        ];
+        
+        console.log("Using fallback data:", fallbackData);
+        return fallbackData;
+      }
     }
     
     // Access code verification
@@ -400,47 +468,24 @@
       }
       
       try {
-        let isValidCode = false;
-        let expiryDate = null;
+        // Ambil data akses dari package.json
+        const accessList = await getAccessData();
+        console.log("Access list:", accessList);
         
-        // 1. Cek package.json embedded
-        if (PACKAGE_JSON.accessList && Array.isArray(PACKAGE_JSON.accessList)) {
-          const accessEntry = PACKAGE_JSON.accessList.find(entry => 
-            entry.code && entry.code.toLowerCase() === inputCode.toLowerCase()
-          );
+        // Cari kode akses yang sesuai
+        const accessEntry = accessList.find(entry => {
+          // Case-insensitive comparison
+          const entryCode = entry.code || '';
+          return entryCode.toLowerCase() === inputCode.toLowerCase();
+        });
+        
+        console.log("Found entry:", accessEntry);
+        
+        if (accessEntry) {
+          // Dapatkan tanggal expiry (handle both 'expiry' and 'Expiry')
+          const expiryDate = accessEntry.expiry || accessEntry.Expiry;
+          console.log("Expiry date:", expiryDate);
           
-          if (accessEntry) {
-            isValidCode = true;
-            // Gunakan properti 'expiry' atau 'Expiry' (case insensitive)
-            expiryDate = accessEntry.expiry || accessEntry.Expiry;
-          }
-        }
-        
-        // 2. Cek package.json lokal (jika ada)
-        if (!isValidCode) {
-          try {
-            const packageResponse = await fetch('package.json');
-            if (packageResponse.ok) {
-              const packageData = await packageResponse.json();
-              if (packageData.accessList && Array.isArray(packageData.accessList)) {
-                const accessEntry = packageData.accessList.find(entry => 
-                  entry.code && entry.code.toLowerCase() === inputCode.toLowerCase()
-                );
-                
-                if (accessEntry) {
-                  isValidCode = true;
-                  expiryDate = accessEntry.expiry || accessEntry.Expiry;
-                }
-              }
-            }
-          } catch (e) {
-            console.log("Tidak ada package.json lokal atau error:", e.message);
-          }
-        }
-        
-        
-        // Jika kode valid, cek tanggal kadaluarsa
-        if (isValidCode) {
           if (isAccessCodeValid(expiryDate)) {
             grantAccess();
             return;
@@ -448,10 +493,9 @@
             expiredElement.style.display = 'block';
             return;
           }
+        } else {
+          throw new Error("Kode akses tidak ditemukan");
         }
-        
-        // Jika semua metode gagal
-        throw new Error("Kode akses tidak valid");
         
       } catch (error) {
         console.error("Error:", error);
@@ -546,6 +590,13 @@
     
     // Set current year in footer
     document.getElementById('year').textContent = new Date().getFullYear();
+    
+    // Tambahkan event listener untuk Enter key pada input kode akses
+    document.getElementById('accessCode').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        checkAccessCode();
+      }
+    });
   </script>
 </body>
 </html>
