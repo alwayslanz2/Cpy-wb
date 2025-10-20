@@ -522,38 +522,53 @@
     
     // Original functions
     function encryptHTML() {
-      const raw = document.getElementById("encryptInput").value;
-      if (!raw.trim()) {
+    const raw = document.getElementById("encryptInput").value;
+    if (!raw.trim()) {
         alert("Masukkan kode HTML terlebih dahulu!");
         return;
-      }
-      
-      const encoded = escape(raw);
-      const final = `<script>document.write(unescape("${encoded}"))<\/script>`;
-      document.getElementById("encryptOutput").value = final;
+    }
+    
+    // Metode Lanzishere v2 - rotasi karakter dengan pola tertentu
+    let encrypted = "";
+    for (let i = 0; i < raw.length; i++) {
+        // Geser karakter berdasarkan posisi ganjil/genap
+        const shift = i % 2 === 0 ? 5 : 3; // Ganjil: +5, Genap: +3
+        encrypted += String.fromCharCode(raw.charCodeAt(i) + shift);
+    }
+    
+    // Tambahkan prefix khas Lanzishere
+    const final = "LANZ#" + btoa(encrypted);
+    document.getElementById("encryptOutput").value = final;
     }
 
     function decryptHTML() {
-      const input = document.getElementById("decryptInput").value.trim();
-      if (!input) {
+    const input = document.getElementById("decryptInput").value.trim();
+    if (!input) {
         alert("Masukkan kode terenkripsi terlebih dahulu!");
         return;
-      }
-      
-      let output = "";
-
-      try {
-        output = atob(input);
-      } catch (e1) {
-        try {
-          output = unescape(input);
-        } catch (e2) {
-          output = "❌ Gagal mendekripsi. Format tidak dikenali.";
-        }
-      }
-
-      document.getElementById("decryptOutput").value = output;
     }
+    
+    let output = "";
+
+    try {
+        // Hapus prefix LANZ# jika ada
+        const cleanInput = input.startsWith("LANZ#") ? input.substring(5) : input;
+        
+        // Decode dari base64
+        const decoded = atob(cleanInput);
+        
+        // Dekripsi dengan pola yang sama
+        for (let i = 0; i < decoded.length; i++) {
+            const shift = i % 2 === 0 ? 5 : 3; // Ganjil: -5, Genap: -3
+            output += String.fromCharCode(decoded.charCodeAt(i) - shift);
+        }
+        
+    } catch (e) {
+        output = "❌ Gagal mendekripsi. Format tidak valid atau kode rusak.";
+    }
+
+    document.getElementById("decryptOutput").value = output;
+                              }
 
     async function fetchWebsiteHTML() {
       const url = document.getElementById("urlInput").value.trim();
