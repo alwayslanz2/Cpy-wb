@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Web Code Toolkit</title>
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --secondary: #a29bfe;
+      --dark: #2d3436;
+      --darker: #1e272e;
+      --light: #f5f6fa;
+      --success: #00b894;
+      --warning: #fdcb6e;
+      --danger: #d63031;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background: linear-gradient(135deg, var(--darker), var(--dark));
+      color: var(--light);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      flex: 1;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: inline-block;
+      position: relative;
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      border-radius: 2px;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+      margin: 30px 0 15px;
+      color: var(--secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    textarea, input {
+      width: 100%;
+      padding: 15px;
+      margin-top: 10px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      resize: vertical;
+      transition: border 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    textarea:focus, input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.3);
+    }
+    
+    textarea.readonly {
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--light);
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      margin-top: 15px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .output-container {
+      position: relative;
+      margin-top: 15px;
+    }
+    
+    .copy-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--light);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .copy-btn::before {
+      content: '📋';
+    }
+    
+    .copy-btn.copied::before {
+      content: '✓';
+      color: var(--success);
+    }
+    
+    hr {
+      margin: 40px 0;
+      border: none;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+    }
+    
+    .tool-icon {
+      font-size: 1.2em;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .tool-section {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    .tool-section:nth-child(2) { animation-delay: 0.1s; }
+    .tool-section:nth-child(3) { animation-delay: 0.2s; }
+    .tool-section:nth-child(4) { animation-delay: 0.3s; }
+    
+    /* Footer styles */
+    footer {
+      text-align: center;
+      padding: 20px;
+      margin-top: 40px;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    footer a {
+      color: var(--secondary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    footer a:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+    
+    /* Login form styles */
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+    
+    .login-container h2 {
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+    
+    .login-input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+    }
+    
+    .error-message {
+      color: var(--danger);
+      margin-top: 10px;
+      display: none;
+    }
+    
+    /* Expired message style */
+    .expired-message {
+      color: var(--danger);
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(214, 48, 49, 0.1);
+      border-radius: 8px;
+      text-align: center;
+      display: none;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .container {
+        padding: 10px;
+      }
+      
+      footer {
+        font-size: 0.8rem;
+        padding: 15px;
+      }
+      
+      .login-container {
+        margin: 50px auto;
+        padding: 20px;
+      }
+    }
+    
+    /* Floating animation for header */
+    @keyframes floating {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .floating {
+      animation: floating 6s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-container" style="display: none;">
+    <div class="container">
+      <header>
+        <h1 class="floating">Web Code Toolkit By AlwaysLanz</h1>
+        <p>Tools untuk bekerja dengan kode HTML</p>
+      </header>
+      
+      <main>
+        <section class="tool-section card">
+          <h2><span class="tool-icon">🔒</span> Enkripsi HTML</h2>
+          <p>Ubah HTML biasa menjadi format terenkripsi untuk keamanan</p>
+          <textarea id="encryptInput" placeholder="Masukkan kode HTML di sini..." rows="6"></textarea>
+          <button class="btn" onclick="encryptHTML()">
+            <span>Enkripsi</span> <span>🔐</span>
+          </button>
+          <div class="output-container">
+            <textarea id="encryptOutput" class="readonly" placeholder="Hasil enkripsi akan muncul di sini..." rows="6" readonly></textarea>
+            <button class="copy-btn" onclick="copy('encryptOutput', this)"></button>
+          </div>
+        </section>
+        
+        <hr>
+        
+        <section class="tool-section card">
+          <h2><span class="tool-icon">🔓</span> Dekripsi HTML</h2>
+          <p>Ubah kode terenkripsi kembali ke HTML asli</p>
+          <textarea id="decryptInput" placeholder="Tempelkan kode terenkripsi di sini..." rows="6"></textarea>
+          <button class="btn" onclick="decryptHTML()">
+            <span>Dekripsi</span> <span>🔓</span>
+          </button>
+          <div class="output-container">
+            <textarea id="decryptOutput" class="readonly" placeholder="Hasil dekripsi akan muncul di sini..." rows="6" readonly></textarea>
+            <button class="copy-btn" onclick="copy('decryptOutput', this)"></button>
+          </div>
+        </section>
+        
+        <hr>
+        
+        <section class="tool-section card">
+          <h2><span class="tool-icon">🌐</span> Ambil HTML dari Website</h2>
+          <p>Dapatkan kode HTML dari URL website eksternal</p>
+          <input type="text" id="urlInput" placeholder="Contoh: https://example.com">
+          <button class="btn" onclick="fetchWebsiteHTML()">
+            <span>Ambil HTML</span> <span>⤵️</span>
+          </button>
+          <div class="output-container">
+            <textarea id="fetchOutput" class="readonly" placeholder="HTML dari website akan muncul di sini..." rows="10" readonly></textarea>
+            <button class="copy-btn" onclick="copy('fetchOutput', this)"></button>
+          </div>
+        </section>
+      </main>
+      
+      <footer>
+        <p>Dibuat dengan ❤️ oleh <a href="#" target="_blank">AlwaysLanz</a> | &copy; <span id="year"></span> Web Code Toolkit</p>
+      </footer>
+    </div>
+  </div>
+
+  <div id="login-container" class="login-container">
+    <h2>Masukkan Kode Akses</h2>
+    <input type="password" id="accessCode" class="login-input" placeholder="Kode akses...">
+    <button class="btn" onclick="checkAccessCode()">Masuk</button>
+    <p id="error-message" class="error-message">Kode akses salah!</p>
+    <div id="expired-message" class="expired-message">
+      Kode akses telah kadaluarsa. Silakan hubungi administrator untuk kode akses baru.
+    </div>
+  </div>
+
+  <script>
+    // Embedded package.json configuration
+    const PACKAGE_JSON = {
+      "name": "web-code-toolkit",
+      "version": "1.0.0",
+      "description": "Tools untuk bekerja dengan kode HTML",
+      "accessList": [
+        {
+          "code": "alwayslanz",
+          "expiry": "2025-07-12T08:55:50"
+        },
+        {
+          "code": "freeakses",
+          "expiry": "2025-07-13T10:59:59"
+        },
+        {
+          "code": "kontolmmk",
+          "expiry": "2025-07-16T15:01:01"
+        },
+        {
+          "code": "ekatzy",
+          "expiry": "2025-08-13T16:36:01"
+        },
+        {
+          "code": "Varrga",
+          "expiry": "2025-08-14T13:03:01"
+        },
+        {
+          "code": "jovian057",
+          "expiry": "2025-09-01T15:07:01"
+        }, 
+        {
+          "code": "tes",
+          "expiry": "2025-07-12T09:06:05"
+        }
+      ],
+      "main": "index.html",
+      "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+      },
+      "author": "AlwaysLanz",
+      "license": "MIT"
+    };
+    
+    // Fungsi untuk memeriksa apakah kode akses masih berlaku
+    function isAccessCodeValid(expiryDate) {
+      if (!expiryDate) return false;
+      
+      // Normalisasi format tanggal
+      const normalizedExpiry = expiryDate.trim();
+      const now = new Date();
+      const expiry = new Date(normalizedExpiry);
+      
+      return now <= expiry;
+    }
+    
+    // Access code verification
+    async function checkAccessCode() {
+      const inputCode = document.getElementById('accessCode').value.trim();
+      const errorElement = document.getElementById('error-message');
+      const expiredElement = document.getElementById('expired-message');
+      
+      // Sembunyikan pesan error sebelumnya
+      errorElement.style.display = 'none';
+      expiredElement.style.display = 'none';
+      
+      if (!inputCode) {
+        errorElement.textContent = "Harap masukkan kode akses!";
+        errorElement.style.display = 'block';
+        return;
+      }
+      
+      try {
+        let isValidCode = false;
+        let expiryDate = null;
+        
+        // 1. Cek package.json embedded
+        if (PACKAGE_JSON.accessList && Array.isArray(PACKAGE_JSON.accessList)) {
+          const accessEntry = PACKAGE_JSON.accessList.find(entry => 
+            entry.code && entry.code.toLowerCase() === inputCode.toLowerCase()
+          );
+          
+          if (accessEntry) {
+            isValidCode = true;
+            // Gunakan properti 'expiry' atau 'Expiry' (case insensitive)
+            expiryDate = accessEntry.expiry || accessEntry.Expiry;
+          }
+        }
+        
+        // 2. Cek package.json lokal (jika ada)
+        if (!isValidCode) {
+          try {
+            const packageResponse = await fetch('package.json');
+            if (packageResponse.ok) {
+              const packageData = await packageResponse.json();
+              if (packageData.accessList && Array.isArray(packageData.accessList)) {
+                const accessEntry = packageData.accessList.find(entry => 
+                  entry.code && entry.code.toLowerCase() === inputCode.toLowerCase()
+                );
+                
+                if (accessEntry) {
+                  isValidCode = true;
+                  expiryDate = accessEntry.expiry || accessEntry.Expiry;
+                }
+              }
+            }
+          } catch (e) {
+            console.log("Tidak ada package.json lokal atau error:", e.message);
+          }
+        }
+        
+        // 3. Cek GitHub API (jika diperlukan)
+        if (!isValidCode) {
+          try {
+            const githubResponse = await fetch(
+              'https://api.github.com/repos/alwayslanz2/Access/contents/package.json',
+              {
+                headers: {
+                  'Accept': 'application/vnd.github.v3+json'
+                }
+              }
+            );
+
+            if (githubResponse.ok) {
+              const githubData = await githubResponse.json();
+              const content = JSON.parse(atob(githubData.content.replace(/\s/g, '')));
+              
+              if (content.accessList && Array.isArray(content.accessList)) {
+                const accessEntry = content.accessList.find(entry => 
+                  entry.code && entry.code.toLowerCase() === inputCode.toLowerCase()
+                );
+                
+                if (accessEntry) {
+                  isValidCode = true;
+                  expiryDate = accessEntry.expiry || accessEntry.Expiry;
+                }
+              }
+            }
+          } catch (e) {
+            console.log("Error akses GitHub:", e.message);
+          }
+        }
+        
+        // Jika kode valid, cek tanggal kadaluarsa
+        if (isValidCode) {
+          if (isAccessCodeValid(expiryDate)) {
+            grantAccess();
+            return;
+          } else {
+            expiredElement.style.display = 'block';
+            return;
+          }
+        }
+        
+        // Jika semua metode gagal
+        throw new Error("Kode akses tidak valid");
+        
+      } catch (error) {
+        console.error("Error:", error);
+        errorElement.textContent = "Kode akses salah!";
+        errorElement.style.display = 'block';
+      }
+    }
+    
+    function grantAccess() {
+      document.getElementById('login-container').style.display = 'none';
+      document.getElementById('app-container').style.display = 'block';
+      // Store access in sessionStorage
+      sessionStorage.setItem('hasAccess', 'true');
+    }
+    
+    // Check if already has access
+    if (sessionStorage.getItem('hasAccess') === 'true') {
+      document.getElementById('login-container').style.display = 'none';
+      document.getElementById('app-container').style.display = 'block';
+    } else {
+      document.getElementById('login-container').style.display = 'block';
+      document.getElementById('app-container').style.display = 'none';
+    }
+    
+    // Original functions
+    function encryptHTML() {
+      const raw = document.getElementById("encryptInput").value;
+      if (!raw.trim()) {
+        alert("Masukkan kode HTML terlebih dahulu!");
+        return;
+      }
+      
+      const encoded = escape(raw);
+      const final = `<script>document.write(unescape("${encoded}"))<\/script>`;
+      document.getElementById("encryptOutput").value = final;
+    }
+
+    function decryptHTML() {
+      const input = document.getElementById("decryptInput").value.trim();
+      if (!input) {
+        alert("Masukkan kode terenkripsi terlebih dahulu!");
+        return;
+      }
+      
+      let output = "";
+
+      try {
+        output = atob(input);
+      } catch (e1) {
+        try {
+          output = unescape(input);
+        } catch (e2) {
+          output = "❌ Gagal mendekripsi. Format tidak dikenali.";
+        }
+      }
+
+      document.getElementById("decryptOutput").value = output;
+    }
+
+    async function fetchWebsiteHTML() {
+      const url = document.getElementById("urlInput").value.trim();
+      if (!url) {
+        alert("Masukkan URL website terlebih dahulu!");
+        return;
+      }
+      
+      const output = document.getElementById("fetchOutput");
+      output.value = "🔄 Memuat HTML dari website...";
+      
+      try {
+        const res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(url));
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const html = await res.text();
+        output.value = html;
+      } catch (err) {
+        output.value = "❌ Gagal mengambil HTML: " + err.message;
+      }
+    }
+
+    function copy(id, btn) {
+      const textArea = document.getElementById(id);
+      textArea.select();
+      document.execCommand("copy");
+      
+      if (btn) {
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.classList.remove('copied');
+        }, 2000);
+      }
+    }
+    
+    // Set current year in footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
