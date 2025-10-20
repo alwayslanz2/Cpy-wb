@@ -438,37 +438,6 @@
           }
         }
         
-        // 3. Cek GitHub API (jika diperlukan)
-        if (!isValidCode) {
-          try {
-            const githubResponse = await fetch(
-              'https://api.github.com/repos/alwayslanz2/Access/contents/package.json',
-              {
-                headers: {
-                  'Accept': 'application/vnd.github.v3+json'
-                }
-              }
-            );
-
-            if (githubResponse.ok) {
-              const githubData = await githubResponse.json();
-              const content = JSON.parse(atob(githubData.content.replace(/\s/g, '')));
-              
-              if (content.accessList && Array.isArray(content.accessList)) {
-                const accessEntry = content.accessList.find(entry => 
-                  entry.code && entry.code.toLowerCase() === inputCode.toLowerCase()
-                );
-                
-                if (accessEntry) {
-                  isValidCode = true;
-                  expiryDate = accessEntry.expiry || accessEntry.Expiry;
-                }
-              }
-            }
-          } catch (e) {
-            console.log("Error akses GitHub:", e.message);
-          }
-        }
         
         // Jika kode valid, cek tanggal kadaluarsa
         if (isValidCode) {
